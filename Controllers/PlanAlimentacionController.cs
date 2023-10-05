@@ -72,5 +72,27 @@ namespace LifeArmony_api.Controllers
                 return StatusCode(StatusCodes.Status200OK, $"Success! {response}");
             return StatusCode(StatusCodes.Status402PaymentRequired, $"Error! {response}");
         }
+
+        [HttpGet]
+        [Route("SelectDieta")]
+        public async Task<IActionResult> SelectDieta([FromQuery] List<string> restricciones, double peso, double talla, int edad, int tipo_diabetes)
+        {
+            List<PlanAlimentacion>? response = null;
+            response = await _service.SelectMany();
+
+            if (response != null)
+            {
+                var dietaFiltrada = response.Where(plan =>
+                    restricciones.All(restriccion => !plan.alimentos.Contains(restriccion)) &&
+                    peso >= plan.peso_min && peso <= plan.peso_max &&
+                    talla >= plan.talla_min && talla <= plan.talla_max &&
+                    edad >= plan.edad_min && edad <= plan.edad_max &&
+                    tipo_diabetes == plan.tipo_diabetes
+                ).ToList();
+
+                return StatusCode(StatusCodes.Status200OK, dietaFiltrada.FirstOrDefault());
+            }
+            return StatusCode(StatusCodes.Status402PaymentRequired, $"Error! {response}");
+        }
     }
 }
