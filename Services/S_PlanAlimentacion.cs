@@ -81,7 +81,7 @@ namespace LifeArmony_api.Services
             int response = 0;
             try
             {
-                await _planAlimentacionCollection.DeleteOneAsync(x => x.Id == id && x.status == 1);
+                await _planAlimentacionCollection.DeleteOneAsync(x => x.Id == id);
                 response = 1;
             }
             catch (Exception ex)
