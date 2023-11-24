@@ -75,24 +75,24 @@ namespace LifeArmony_api.Controllers
 
         [HttpGet]
         [Route("SelectDieta")]
-        public async Task<IActionResult> SelectDieta([FromQuery] List<string> restricciones, double peso, double talla, int edad, int tipo_diabetes)
+        public async Task<IActionResult> SelectDieta([FromQuery] List<string> restricciones, double peso, double talla, int edad, string tipo_diabetes)
         {
-            List<PlanAlimentacion>? response = null;
-            response = await _service.SelectMany();
+            List<PlanAlimentacion>? response = await _service.SelectMany();
 
             if (response != null)
             {
                 var dietaFiltrada = response.Where(plan =>
-                    restricciones.All(restriccion => !plan.alimentos.Contains(restriccion)) &&
+                    plan.alimentos.All(dieta => dieta.alimentos.All(alimento => !restricciones.Contains(alimento.ToUpper()))) &&
                     peso >= plan.peso_min && peso <= plan.peso_max &&
                     talla >= plan.talla_min && talla <= plan.talla_max &&
                     edad >= plan.edad_min && edad <= plan.edad_max &&
-                    tipo_diabetes == plan.tipo_diabetes
+                    tipo_diabetes.Equals(plan.tipo_diabetes, StringComparison.OrdinalIgnoreCase)
                 ).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, dietaFiltrada.FirstOrDefault());
+                return Ok(dietaFiltrada.ToList());
             }
-            return StatusCode(StatusCodes.Status402PaymentRequired, $"Error! {response}");
+
+            return NotFound($"Error! No se pudo encontrar una dieta adecuada.");
         }
     }
 }
